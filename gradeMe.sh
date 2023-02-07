@@ -19,10 +19,10 @@ MERGEREFDIR=./ref-6b/merge
 DIFFOPTION="-w -B"
 score=0
 
-#pwd
+pwd
 make clean >& /dev/null
 make >& /dev/null
-#echo $?
+echo $?
 if [[ $? != 0 ]]; then
 	echo -e "${RED_COLOR}[-_-]$ite: Compile Error${RES}"		
 	make clean >& /dev/null
@@ -32,6 +32,8 @@ fi
 	do		
 		if [ ${tcase##*.} = "tig" ]; then
 			tfileName=${tcase##*/}
+			echo ./$BIN $TESTCASEDIR/$tfileName
+			echo gcc -Wl,--wrap,getchar -m32 $TESTCASEDIR/${tfileName}.s runtime.c -o test.out
 			./$BIN $TESTCASEDIR/$tfileName &>/dev/null
 			gcc -Wl,--wrap,getchar -m32 $TESTCASEDIR/${tfileName}.s runtime.c -o test.out &>/dev/null
 			if [ ! -s test.out ]; then

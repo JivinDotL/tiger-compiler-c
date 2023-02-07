@@ -31,7 +31,7 @@ void MOV_addlist(moveList*, G_node, G_node);
 bool MOV_inlist(moveList, move);
 void MOV_delete(moveList*, move);
 void MOV_add(moveList*, move);
-bool MOV_empty(moveList);
+bool MOV_empty(move);
 // bool MOV_inlist(moveList, move);
 // void MOV_delete(moveList*, move);
 // void MOV_add(moveList*, move);

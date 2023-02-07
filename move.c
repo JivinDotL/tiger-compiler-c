@@ -8,7 +8,7 @@ bool
 MOV_inlist_brute(moveList ml, G_node src, G_node dst)
 {
   for (; ml; ml = ml->tail) {
-    if (ml->src == src && ml->dst == dst) {
+    if (ml->head->src == src && ml->head->dst == dst) {
       return TRUE;
     }
   }
@@ -74,8 +74,8 @@ MOV_intersection(moveList m1, moveList m2)
 
   moveList r = NULL;
   for (; m2; m2 = m2->tail) {
-    if (MOV_inlist_brute(m1, m2->src, m2->dst)) {
-      r = Live_MoveList(m2->src, m2->dst, r);
+    if (MOV_inlist_brute(m1, m2->head->src, m2->head->dst)) {
+      r = Live_MoveList(m2->head->src, m2->head->dst, r);
       printf("add to r\n");
     }
   }
@@ -88,10 +88,10 @@ copylist(moveList m)
   moveList tl = NULL, hd = NULL;
   for (; m; m = m->tail) {
     if (!tl) {
-      hd = tl = Live_MoveList(m->src, m->dst, NULL);
+      hd = tl = Live_MoveList(m->head->src, m->head->dst, NULL);
     }
     else {
-      tl = tl->tail = Live_MoveList(m->src, m->dst, NULL);
+      tl = tl->tail = Live_MoveList(m->head->src, m->head->dst, NULL);
     }
   }
   return hd;
@@ -104,8 +104,8 @@ MOV_union(moveList m1, moveList m2)
 
   moveList r = copylist(m1);
   for (; m2; m2 = m2->tail) {
-    if (!m1 || !MOV_inlist_brute(m1, m2->src, m2->dst))
-      r = Live_MoveList(m2->src, m2->dst, r);
+    if (!m1 || !MOV_inlist_brute(m1, m2->head->src, m2->head->dst))
+      r = Live_MoveList(m2->head->src, m2->head->dst, r);
   }
   return r;
 }
@@ -126,8 +126,8 @@ MOV_table MOV_Table(moveList ml) // traverse movelist and build table.
   MOV_table mt = TAB_empty();
 
   for (; !MOV_empty(ml); ml = ml->tail) {
-    src = ml->src;
-    dst = ml->dst;
+    src = ml->head->src;
+    dst = ml->head->dst;
     MOV_append(mt, src, Live_MoveList(src, dst, NULL));
     if (src != dst) {
       MOV_append(mt, dst, Live_MoveList(src, dst, NULL));
@@ -203,8 +203,8 @@ MOV_delete(moveList* l, move m)
   }
   else {
     // l is head. if *l != m, m has prev.
-    m->prev->tail = m->tail;
-    m->tail->prev = m->prev;
+    (*l)->prev->tail = (*l)->tail;
+    (*l)->tail->prev = (*l)->prev;
   }
 }
 
@@ -212,7 +212,7 @@ void
 MOV_add(moveList* l, move m)
 {
   if (!MOV_inlist(*l, m)) {
-    m->id = (*l)->id;
+    m->sid = (*l)->sid;
     *l = Live_MoveList(m->src, m->dst, *l);
   }
 }
@@ -221,12 +221,12 @@ void
 MOV_addlist(moveList* l, G_node src, G_node dst)
 {
   moveList newnode = Live_MoveList(src, dst, *l);
-  newnode->id = (*l)->id;
+  newnode->sid = (*l)->sid;
   *l = newnode;
 }
 
 bool
-MOV_empty(moveList m)
+MOV_empty(move m)
 {
   assert(!m->src == !m->dst);
   return !m->src;
